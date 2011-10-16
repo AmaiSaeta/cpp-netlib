@@ -16,6 +16,18 @@
 using namespace boost::network;
 
 
+BOOST_AUTO_TEST_CASE(uri_iterator_range_test) {
+    using boost::network::uri::detail::iterator_range;
+    using boost::fusion::at_c;
+
+    std::string instance("http://www.example.com/");
+
+    iterator_range<std::string> range;
+    at_c<0>(range) = instance.begin();
+    at_c<1>(range) = instance.end();
+    BOOST_CHECK(boost::equal(range, instance));
+}
+
 BOOST_AUTO_TEST_CASE(basic_uri_range_test) {
     uri::uri instance("http://www.example.com/");
     BOOST_REQUIRE(uri::valid(instance));
