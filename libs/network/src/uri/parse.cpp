@@ -9,7 +9,10 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/version.hpp>
-#include <boost/spirit/repository/include/qi_iter_pos.hpp>
+#include <boost/spirit/repository/home/qi/primitive/iter_pos.hpp>
+
+
+#include <iostream>
 
 
 namespace boost {
@@ -17,6 +20,14 @@ namespace network {
 namespace uri {
 namespace detail {
 namespace qi = boost::spirit::qi;
+
+struct print
+{
+	void operator () (qi::unused_type, qi::unused_type, qi::unused_type) const
+	{
+		std::cerr << "I am a banana." << std::endl;
+	}
+};
 
 template <
     class String,
@@ -164,7 +175,7 @@ struct uri_grammar : qi::grammar<Iterator, detail::uri_parts<String>()> {
 
         // fragment = *( pchar / "/" / "?" )
         fragment %=
-               iter_pos
+			   iter_pos
             >> qi::omit[qi::raw[*(pchar | qi::char_("/?"))]]
             >> iter_pos
             ;
@@ -174,10 +185,10 @@ struct uri_grammar : qi::grammar<Iterator, detail::uri_parts<String>()> {
         hier_part %=
             (
                 "//"
-                >>  -(user_info >> '@')
-                >>  host
-                >> -(':' >> port)
-                >>  path_abempty
+                >>  -(user_info[print()] >> '@')
+                >>  host[print()]
+                >> -(':' >> port[print()])
+                >>  path_abempty[print()]
                 )
             |
             (
@@ -185,18 +196,18 @@ struct uri_grammar : qi::grammar<Iterator, detail::uri_parts<String>()> {
                 >>  qi::attr(iterator_range<String>())
                 >>  qi::attr(iterator_range<String>())
                 >>  (
-                    path_absolute
-                    |   path_rootless
-                    |   path_empty
+                    path_absolute[print()]
+                    |   path_rootless[print()]
+                    |   path_empty[print()]
                     )
                 )
             ;
 
         start %=
-            scheme >> ':'
+            scheme[print()] >> ':'
             >> hier_part
-            >>  -('?' >> query)
-            >>  -('#' >> fragment)
+		    >>  -('?' >> query[print()])
+			>>  -('#' >> fragment[print()])
             ;
     }
 
@@ -242,14 +253,14 @@ bool parse(std::string::const_iterator first,
     return is_valid && (first == last);
 }
 
-bool parse(std::wstring::const_iterator first,
-           std::wstring::const_iterator last,
-           uri_parts<std::wstring> &parts) {
-    namespace qi = boost::spirit::qi;
-    static uri_grammar<std::wstring, std::wstring::const_iterator> grammar;
-    bool is_valid = qi::parse(first, last, grammar, parts);
-    return is_valid && (first == last);
-}
+//bool parse(std::wstring::const_iterator first,
+//           std::wstring::const_iterator last,
+//           uri_parts<std::wstring> &parts) {
+//    namespace qi = boost::spirit::qi;
+//    static uri_grammar<std::wstring, std::wstring::const_iterator> grammar;
+//    bool is_valid = qi::parse(first, last, grammar, parts);
+//    return is_valid && (first == last);
+//}
 } // namespace detail
 } // namespace uri
 } // namespace network
