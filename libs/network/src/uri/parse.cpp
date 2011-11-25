@@ -21,12 +21,88 @@ namespace uri {
 namespace detail {
 namespace qi = boost::spirit::qi;
 
-struct print
+struct assign_scheme
 {
-	void operator () (qi::unused_type, qi::unused_type, qi::unused_type) const
-	{
-		std::cerr << "I am a banana." << std::endl;
-	}
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "scheme (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_user_info
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "user_info (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_host
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "host (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_port
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "port (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_path
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "path (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_query
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "query (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
+};
+
+struct assign_fragment
+{
+	void operator () (const iterator_range<std::string> &range,
+                      qi::unused_type, qi::unused_type) const {
+        using boost::fusion::at_c;
+        std::cout << "fragment (";
+        std::copy(at_c<0>(range), at_c<1>(range),
+                  std::ostream_iterator<char>(std::cout));
+        std::cout << ")" << std::endl;
+    }
 };
 
 template <
@@ -185,10 +261,10 @@ struct uri_grammar : qi::grammar<Iterator, detail::uri_parts<String>()> {
         hier_part %=
             (
                 "//"
-                >>  -(user_info[print()] >> '@')
-                >>  host[print()]
-                >> -(':' >> port[print()])
-                >>  path_abempty[print()]
+                >>  -(user_info[assign_user_info()] >> '@')
+                >>  host[assign_host()]
+                >> -(':' >> port[assign_port()])
+                >>  path_abempty[assign_path()]
                 )
             |
             (
@@ -196,18 +272,18 @@ struct uri_grammar : qi::grammar<Iterator, detail::uri_parts<String>()> {
                 >>  qi::attr(iterator_range<String>())
                 >>  qi::attr(iterator_range<String>())
                 >>  (
-                    path_absolute[print()]
-                    |   path_rootless[print()]
-                    |   path_empty[print()]
+                    path_absolute[assign_path()]
+                    |   path_rootless[assign_path()]
+                    |   path_empty[assign_path()]
                     )
                 )
             ;
 
         start %=
-            scheme[print()] >> ':'
+            scheme[assign_scheme()] >> ':'
             >> hier_part
-		    >>  -('?' >> query[print()])
-			>>  -('#' >> fragment[print()])
+		    >>  -('?' >> query[assign_query()])
+			>>  -('#' >> fragment[assign_fragment()])
             ;
     }
 
