@@ -8,12 +8,18 @@ if (OPENSSL_FOUND)
   include_directories(${OPENSSL_INCLUDE_DIR})
 endif (OPENSSL_FOUND)
 
+set(Boost_FOUND FALSE)
+set(CPP-NETLIB_BOOST_HAS_LOG FALSE)
+
 add_executable(http_client http_client.cpp)
 add_executable(simple_wget simple_wget.cpp)
 add_executable(atom_reader atom/atom.cpp atom/main.cpp)
 add_executable(rss_reader rss/rss.cpp rss/main.cpp)
 add_executable(twitter_search twitter/search.cpp)
 add_executable(hello_world_server http/hello_world_server.cpp)
+if (CPP-NETLIB_BOOST_HAS_LOG)
+  add_executable(hello_world_server_log http/hello_world_server_log.cpp)
+endif (CPP-NETLIB_BOOST_HAS_LOG)
 if (UNIX)
   add_executable(fileserver http/fileserver.cpp)
 endif (UNIX)
@@ -71,6 +77,12 @@ target_link_libraries(hello_world_server
     ${BOOST_SERVER_LIBS}
     ${CMAKE_THREAD_LIBS_INIT})
 
+if (CPP-NETLIB_BOOST_HAS_LOG)
+  target_link_libraries(hello_world_server_log
+    ${BOOST_SERVER_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT})
+endif (CPP-NETLIB_BOOST_HAS_LOG)
+
 if (OPENSSL_FOUND)
   target_link_libraries(http_client ${OPENSSL_LIBRARIES})
   target_link_libraries(simple_wget ${OPENSSL_LIBRARIES})
@@ -78,6 +90,9 @@ if (OPENSSL_FOUND)
   target_link_libraries(rss_reader ${OPENSSL_LIBRARIES})
   target_link_libraries(twitter_search ${OPENSSL_LIBRARIES})
   target_link_libraries(hello_world_server ${OPENSSL_LIBRARIES})
+  if (CPP-NETLIB_BOOST_HAS_LOG)
+    target_link_libraries(hello_world_server_log ${OPENSSL_LIBRARIES})
+    endif (CPP-NETLIB_BOOST_HAS_LOG)
 endif (OPENSSL_FOUND)
 
 if (UNIX)
@@ -95,6 +110,9 @@ set_target_properties(atom_reader PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETL
 set_target_properties(rss_reader PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/example)
 set_target_properties(twitter_search PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/example)
 set_target_properties(hello_world_server PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/example)
+if (CPP-NETLIB_BOOST_HAS_LOG)
+  set_target_properties(hello_world_server_log PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/example)
+endif (CPP-NETLIB_BOOST_HAS_LOG)
 if (UNIX)
   set_target_properties(fileserver PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/example)
 endif (UNIX)
